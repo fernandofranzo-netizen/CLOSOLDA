@@ -11,7 +11,6 @@ import {
   Search,
   Plus,
   Phone,
-  MessageCircle,
   Mail,
   MapPin,
   FileText,
@@ -27,6 +26,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { openWhatsAppChat } from '../../services/whatsappService';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface ClientsModuleProps {
   clients: Client[];
@@ -296,12 +296,19 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                   {/* Contact Info */}
                   <div className="mt-3 space-y-1.5 text-xs text-slate-300">
                     <div className="flex items-center gap-2 truncate">
-                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>{client.telefone}</span>
-                      {client.whatsapp && (
-                        <span className="text-emerald-400 text-[10px] font-bold">
-                          (WhatsApp)
-                        </span>
+                      {client.whatsapp ? (
+                        <>
+                          <WhatsAppIcon variant="official" className="w-4 h-4 shrink-0" />
+                          <span className="font-semibold text-slate-100">{client.whatsapp}</span>
+                          <span className="text-[#25D366] text-[10px] font-bold">
+                            (WhatsApp)
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{client.telefone}</span>
+                        </>
                       )}
                     </div>
 
@@ -327,11 +334,11 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                   <div className="flex items-center gap-2">
                     {client.whatsapp && (
                       <button
-                        onClick={() => openWhatsAppChat(client.whatsapp, `Olá, ${client.nome}! Aqui é da CloSolda Serviços de Soldagem.`)}
+                        onClick={() => openWhatsAppChat(client.whatsapp, `Olá, ${client.nome}! Aqui é da CloMec Serviços Especializados.`)}
                         title="Conversar no WhatsApp"
-                        className="p-1.5 rounded-lg bg-emerald-950/70 text-emerald-400 hover:bg-emerald-900 border border-emerald-500/30 transition"
+                        className="p-1.5 rounded-lg bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 transition flex items-center justify-center group shadow-sm"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
+                        <WhatsAppIcon variant="official" className="w-4 h-4 transition-transform group-hover:scale-110" />
                       </button>
                     )}
 
@@ -395,10 +402,10 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
               <div className="flex items-center gap-2">
                 {selectedClient.whatsapp && (
                   <button
-                    onClick={() => openWhatsAppChat(selectedClient.whatsapp, `Olá, ${selectedClient.nome}! Entramos em contato da CloSolda Serviços de Soldagem.`)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-sm"
+                    onClick={() => openWhatsAppChat(selectedClient.whatsapp, `Olá, ${selectedClient.nome}! Entramos em contato da CloMec Serviços Especializados.`)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-slate-950 text-xs font-bold transition shadow-sm"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <WhatsAppIcon variant="official" className="w-4 h-4 shrink-0" />
                     <span>WhatsApp</span>
                   </button>
                 )}
@@ -502,7 +509,10 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contato Principal</span>
                       <p className="text-sm font-semibold text-white mt-1">{selectedClient.telefone}</p>
                       {selectedClient.whatsapp && (
-                        <p className="text-xs text-emerald-400 mt-0.5">WhatsApp: {selectedClient.whatsapp}</p>
+                        <p className="text-xs text-[#25D366] mt-1 flex items-center gap-1.5 font-medium">
+                          <WhatsAppIcon variant="official" className="w-3.5 h-3.5 shrink-0" />
+                          <span>WhatsApp: {selectedClient.whatsapp}</span>
+                        </p>
                       )}
                       {selectedClient.email && (
                         <p className="text-xs text-slate-300 mt-1 flex items-center gap-1">

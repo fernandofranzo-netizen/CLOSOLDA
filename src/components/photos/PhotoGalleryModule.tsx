@@ -129,7 +129,7 @@ export const PhotoGalleryModule: React.FC<PhotoGalleryModuleProps> = ({
         if (hasDriveToken) {
           driveResult = await uploadToDrive(
             file,
-            `CloSolda_${selectedProject?.codigo || 'PRJ'}_${uploadStage}_${Date.now()}_${i + 1}.jpg`,
+            `CloMec_${selectedProject?.codigo || 'PRJ'}_${uploadStage}_${Date.now()}_${i + 1}.jpg`,
             file.type || 'image/jpeg',
             targetFolderId,
             (pct) => setUploadProgress(40 + Math.round((pct * 50) / 100))

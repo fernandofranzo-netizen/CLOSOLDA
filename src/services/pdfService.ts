@@ -13,7 +13,7 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
   const margin = 14;
   let y = 14;
 
-  // Header Banner Background: CloSolda Navy #071B35
+  // Header Banner Background: CloMec Navy #071B35
   doc.setFillColor(7, 27, 53);
   doc.rect(0, 0, pageWidth, 38, 'F');
 
@@ -21,13 +21,13 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
   doc.setFillColor(255, 133, 0);
   doc.rect(0, 38, pageWidth, 2.5, 'F');
 
-  // Header Brand CloSolda
+  // Header Brand CloMec
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.text('CLO', margin, 20);
   doc.setTextColor(255, 133, 0);
-  doc.text('SOLDA', margin + 17, 20);
+  doc.text('MEC', margin + 17, 20);
 
   doc.setFontSize(8.5);
   doc.setTextColor(174, 184, 196);
@@ -69,10 +69,10 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
   doc.setTextColor(51, 65, 85);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
-  const compName = settings?.nomeFantasia || 'CloSolda — Serviços de Soldagem';
+  const compName = settings?.nomeFantasia || 'CloMec — Serviços Especializados';
   const compDoc = settings?.cnpjCpf ? `CNPJ/CPF: ${settings.cnpjCpf}` : 'Prestação de Serviços Especializados';
   const compPhone = settings?.telefone || settings?.whatsapp || '(00) 00000-0000';
-  const compEmail = settings?.email || 'contato@closolda.com.br';
+  const compEmail = settings?.email || 'contato@clomec.com.br';
   const compCity = settings?.cidade ? `${settings.cidade} - ${settings.estado || 'BR'}` : 'Brasil';
   doc.text(compName, margin + 3, y + 11);
   doc.text(compDoc, margin + 3, y + 16);
@@ -134,25 +134,36 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
 
   y += 7;
   // Table Header
-  const colCat = 32;
-  const colDesc = 82;
-  const colQtd = 16;
+  const tableX = margin;
+  const tableWidth = pageWidth - margin * 2;
+  const tableRight = tableX + tableWidth;
+
+  const colCat = 30;
+  const colQtd = 14;
   const colUnit = 16;
   const colValUnit = 24;
-  const colValTotal = 24;
+  const colValTotal = 26;
+  const colDesc = tableWidth - (colCat + colQtd + colUnit + colValUnit + colValTotal); // 72 mm
 
   doc.setFillColor(226, 232, 240);
-  doc.rect(margin, y, pageWidth - margin * 2, 6, 'F');
+  doc.rect(tableX, y, tableWidth, 6, 'F');
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
-  let curX = margin + 2;
-  doc.text('Categoria', curX, y + 4.2); curX += colCat;
-  doc.text('Descrição', curX, y + 4.2); curX += colDesc;
-  doc.text('Qtd', curX, y + 4.2, { align: 'center' }); curX += colQtd;
-  doc.text('Unid.', curX, y + 4.2, { align: 'center' }); curX += colUnit;
-  doc.text('Valor Unit.', curX + colValUnit - 2, y + 4.2, { align: 'right' }); curX += colValUnit;
-  doc.text('Total', curX + colValTotal - 2, y + 4.2, { align: 'right' });
+
+  const catX = tableX + 3;
+  const descX = tableX + colCat + 2;
+  const qtdX = tableX + colCat + colDesc + colQtd / 2;
+  const unitX = tableX + colCat + colDesc + colQtd + colUnit / 2;
+  const valUnitX = tableX + colCat + colDesc + colQtd + colUnit + colValUnit - 3;
+  const totalX = tableRight - 4;
+
+  doc.text('Categoria', catX, y + 4.2);
+  doc.text('Descrição', descX, y + 4.2);
+  doc.text('Qtd', qtdX, y + 4.2, { align: 'center' });
+  doc.text('Unid.', unitX, y + 4.2, { align: 'center' });
+  doc.text('Valor Unit.', valUnitX, y + 4.2, { align: 'right' });
+  doc.text('Total', totalX, y + 4.2, { align: 'right' });
 
   y += 6;
 
@@ -163,39 +174,32 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
 
   if (items.length === 0) {
     doc.setFillColor(255, 255, 255);
-    doc.rect(margin, y, pageWidth - margin * 2, 8, 'F');
+    doc.rect(tableX, y, tableWidth, 8, 'F');
     doc.setTextColor(100, 116, 139);
-    doc.text('Nenhum item discriminado no orçamento.', margin + 3, y + 5.5);
+    doc.text('Nenhum item discriminado no orçamento.', tableX + 3, y + 5.5);
     y += 8;
   } else {
     items.forEach((item, index) => {
       const isEven = index % 2 === 0;
       doc.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
       doc.setDrawColor(241, 245, 249);
-      doc.rect(margin, y, pageWidth - margin * 2, 6.5, 'FD');
+      doc.rect(tableX, y, tableWidth, 6.5, 'FD');
 
       doc.setTextColor(51, 65, 85);
-      let rowX = margin + 2;
-      doc.text(doc.splitTextToSize(item.categoria, colCat - 2)[0] || '', rowX, y + 4.5);
-      rowX += colCat;
+      doc.text(doc.splitTextToSize(item.categoria, colCat - 4)[0] || '', catX, y + 4.5);
 
-      const descSnippet = doc.splitTextToSize(item.descricao, colDesc - 2)[0] || '';
-      doc.text(descSnippet, rowX, y + 4.5);
-      rowX += colDesc;
+      const descSnippet = doc.splitTextToSize(item.descricao, colDesc - 4)[0] || '';
+      doc.text(descSnippet, descX, y + 4.5);
 
-      doc.text(String(item.quantidade), rowX + colQtd / 2, y + 4.5, { align: 'center' });
-      rowX += colQtd;
-
-      doc.text(item.unidade || 'un', rowX + colUnit / 2, y + 4.5, { align: 'center' });
-      rowX += colUnit;
+      doc.text(String(item.quantidade), qtdX, y + 4.5, { align: 'center' });
+      doc.text(item.unidade || 'un', unitX, y + 4.5, { align: 'center' });
 
       const vuFormatted = item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-      doc.text(`R$ ${vuFormatted}`, rowX + colValUnit - 2, y + 4.5, { align: 'right' });
-      rowX += colValUnit;
+      doc.text(`R$ ${vuFormatted}`, valUnitX, y + 4.5, { align: 'right' });
 
       const vtFormatted = item.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
       doc.setFont('helvetica', 'bold');
-      doc.text(`R$ ${vtFormatted}`, rowX + colValTotal - 2, y + 4.5, { align: 'right' });
+      doc.text(`R$ ${vtFormatted}`, totalX, y + 4.5, { align: 'right' });
       doc.setFont('helvetica', 'normal');
 
       y += 6.5;
@@ -287,12 +291,12 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
   doc.setFontSize(7.5);
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
-  const respName = settings?.responsavelNome || 'CloSolda Serviços Técnicos';
+  const respName = settings?.responsavelNome || 'CloMec Serviços Técnicos';
   doc.text(respName, margin + 6 + sigColWidth / 2, sigY + 4, { align: 'center' });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Responsável Técnico / CloSolda', margin + 6 + sigColWidth / 2, sigY + 8, { align: 'center' });
+  doc.text('Responsável Técnico / CloMec', margin + 6 + sigColWidth / 2, sigY + 8, { align: 'center' });
 
   // Cliente signature
   const clientSigX = margin + 14 + sigColWidth;
@@ -312,7 +316,7 @@ export function generateQuotePDF(quote: Quote, settings?: Partial<CompanySetting
   doc.rect(0, pageHeight - 9, pageWidth, 9, 'F');
   doc.setFontSize(7);
   doc.setTextColor(255, 255, 255);
-  doc.text('CloSolda • Soluções em Soldagem Industrial e Residencial • Qualidade, Segurança e Compromisso', pageWidth / 2, pageHeight - 3.5, { align: 'center' });
+  doc.text('CloMec • Soluções em Soldagem e Metalmecânica • Qualidade, Segurança e Compromisso', pageWidth / 2, pageHeight - 3.5, { align: 'center' });
 
   return doc;
 }
@@ -333,7 +337,7 @@ export function generateReportPDF(
   const margin = 14;
   let y = 14;
 
-  // Header Banner Background: CloSolda Navy #071B35
+  // Header Banner Background: CloMec Navy #071B35
   doc.setFillColor(7, 27, 53);
   doc.rect(0, 0, pageWidth, 38, 'F');
 
@@ -347,7 +351,7 @@ export function generateReportPDF(
   doc.setFontSize(22);
   doc.text('CLO', margin, 20);
   doc.setTextColor(255, 133, 0);
-  doc.text('SOLDA', margin + 17, 20);
+  doc.text('MEC', margin + 17, 20);
 
   doc.setFontSize(8.5);
   doc.setTextColor(174, 184, 196);
@@ -394,7 +398,7 @@ export function generateReportPDF(
 
   doc.text(`Responsável Técnico: ${report.responsavelNome}`, rightIdX, y + 10);
   doc.text(`Conclusão: ${report.dataConclusao ? new Date(report.dataConclusao).toLocaleDateString('pt-BR') : 'Finalizado'}`, rightIdX, y + 15);
-  doc.text(`Prestador: ${settings?.nomeFantasia || 'CloSolda'}`, rightIdX, y + 20);
+  doc.text(`Prestador: ${settings?.nomeFantasia || 'CloMec'}`, rightIdX, y + 20);
 
   y += 29;
 
@@ -503,7 +507,7 @@ export function generateReportPDF(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Responsável Técnico / CloSolda', margin + 5 + sigBoxW / 2, currentY + 24, { align: 'center' });
+  doc.text('Responsável Técnico / CloMec', margin + 5 + sigBoxW / 2, currentY + 24, { align: 'center' });
 
   // Cliente
   const cX = margin + 7 + sigBoxW;
@@ -522,7 +526,7 @@ export function generateReportPDF(
   doc.rect(0, pageHeight - 9, pageWidth, 9, 'F');
   doc.setFontSize(7);
   doc.setTextColor(255, 255, 255);
-  doc.text('CloSolda • Soluções em Soldagem Industrial e Residencial • Qualidade, Segurança e Compromisso', pageWidth / 2, pageHeight - 3.5, { align: 'center' });
+  doc.text('CloMec • Soluções em Soldagem e Metalmecânica • Qualidade, Segurança e Compromisso', pageWidth / 2, pageHeight - 3.5, { align: 'center' });
 
   return doc;
 }

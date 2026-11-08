@@ -20,10 +20,10 @@ import {
   X,
   AlertTriangle,
   FileCheck2,
-  MessageCircle,
   ExternalLink,
 } from 'lucide-react';
 import { openWhatsAppChat, formatServiceCompletedMessage } from '../../services/whatsappService';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface ProjectsModuleProps {
   projects: Project[];
@@ -376,11 +376,11 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                     {(project.status === 'Concluído' || project.status === 'Entregue') && (
                       <button
                         onClick={() => handleSendCompletionWhatsApp(project)}
-                        className="p-1.5 rounded-lg bg-emerald-950/80 text-emerald-400 hover:bg-emerald-900 border border-emerald-500/30 transition text-xs flex items-center gap-1"
+                        className="p-1.5 rounded-lg bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] transition text-xs flex items-center gap-1 group shadow-sm"
                         title="Notificar Conclusão do Serviço no WhatsApp"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Concluído</span>
+                        <WhatsAppIcon variant="official" className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
+                        <span className="hidden sm:inline font-semibold">Conclusão WhatsApp</span>
                       </button>
                     )}
 
@@ -448,7 +448,7 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                     Equipamentos e Ferramental
                   </span>
                   <p className="text-slate-300 leading-relaxed">
-                    {selectedDetailProject.equipamentos || 'Máquinas inversoras CloSolda e EPIs.'}
+                    {selectedDetailProject.equipamentos || 'Máquinas inversoras e ferramentas CloMec e EPIs.'}
                   </p>
                 </div>
               </div>

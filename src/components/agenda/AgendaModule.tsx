@@ -10,7 +10,6 @@ import {
   Clock,
   MapPin,
   Plus,
-  MessageCircle,
   CalendarCheck,
   AlertTriangle,
   Edit2,
@@ -23,6 +22,7 @@ import {
 import { openWhatsAppChat, formatAppointmentMessage } from '../../services/whatsappService';
 import { syncAppointmentToGoogleCalendar } from '../../services/driveService';
 import { getCachedGoogleAccessToken } from '../../services/firebase';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface AgendaModuleProps {
   appointments: Appointment[];
@@ -414,11 +414,11 @@ export const AgendaModule: React.FC<AgendaModuleProps> = ({
                   {/* WhatsApp confirmation */}
                   <button
                     onClick={() => handleSendWhatsAppConfirmation(appt)}
-                    className="p-2 rounded-xl bg-emerald-950/70 text-emerald-400 hover:bg-emerald-900 border border-emerald-500/30 transition flex items-center gap-1.5 text-xs font-bold"
+                    className="p-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] transition flex items-center gap-1.5 text-xs font-bold group shadow-sm"
                     title="Confirmar com o cliente pelo WhatsApp"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Confirmar</span>
+                    <WhatsAppIcon variant="official" className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    <span className="hidden sm:inline">Confirmar WhatsApp</span>
                   </button>
 
                   {/* Google Calendar sync */}
@@ -467,7 +467,7 @@ export const AgendaModule: React.FC<AgendaModuleProps> = ({
               <div className="flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5 text-[#FF8500]" />
                 <h2 className="text-lg font-bold font-industrial">
-                  {editingAppt ? 'Editar Compromisso' : 'Novo Agendamento CloSolda'}
+                  {editingAppt ? 'Editar Compromisso' : 'Novo Agendamento CloMec'}
                 </h2>
               </div>
               <button

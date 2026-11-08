@@ -14,9 +14,9 @@ export default defineConfig(() => {
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
           id: '/',
-          name: 'CloSolda - Gestão de Serviços de Soldagem',
-          short_name: 'CloSolda',
-          description: 'Sistema profissional de gestão para serviços de soldagem industrial e residencial.',
+          name: 'CloMec - Gestão de Serviços e Metalmecânica',
+          short_name: 'CloMec',
+          description: 'Sistema profissional de gestão para serviços de soldagem, usinagem e mecânica industrial.',
           theme_color: '#071B35',
           background_color: '#071B35',
           display: 'standalone',

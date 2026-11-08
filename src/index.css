@@ -2,6 +2,13 @@
 
 @layer base {
   :root {
+    --color-clomec-navy: #071B35;
+    --color-clomec-blue: #123F70;
+    --color-clomec-orange: #FF8500;
+    --color-clomec-orange-hover: #E67600;
+    --color-clomec-metallic: #AEB8C4;
+    --color-clomec-graphite: #242B33;
+    --color-clomec-dark: #0B1626;
     --color-closolda-navy: #071B35;
     --color-closolda-blue: #123F70;
     --color-closolda-orange: #FF8500;

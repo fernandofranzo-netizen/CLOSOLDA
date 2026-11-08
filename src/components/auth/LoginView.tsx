@@ -168,7 +168,7 @@ export const LoginView: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@closolda.com.br"
+                  placeholder="admin@clomec.com.br"
                   required
                   className="w-full pl-10 pr-4 py-2.5 bg-[#071B35] border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF8500] focus:ring-1 focus:ring-[#FF8500] transition"
                 />
@@ -216,7 +216,7 @@ export const LoginView: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 bg-[#FF8500] hover:bg-[#E67600] text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg shadow-[#FF8500]/20 transition-all active:scale-[0.98] disabled:opacity-60"
             >
               <Flame className="w-4 h-4 fill-slate-950" />
-              <span>{isLoading ? 'Autenticando...' : 'Entrar no Sistema CloSolda'}</span>
+              <span>{isLoading ? 'Autenticando...' : 'Entrar no Sistema CloMec'}</span>
             </button>
           </form>
         </div>
@@ -224,7 +224,7 @@ export const LoginView: React.FC = () => {
         {/* Security Policy Notice */}
         <div className="mt-6 pt-5 border-t border-slate-800 text-center">
           <p className="text-xs text-slate-400">
-            Ambiente exclusivo para gestão operacional da <strong className="text-slate-200">CloSolda</strong>.
+            Ambiente exclusivo para gestão operacional da <strong className="text-slate-200">CloMec</strong>.
           </p>
           <p className="text-[11px] text-slate-500 mt-1">
             Cadastro público desativado por política de segurança interna.

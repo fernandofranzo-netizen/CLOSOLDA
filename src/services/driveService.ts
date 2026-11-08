@@ -109,8 +109,8 @@ export async function findOrCreateFolder(
 }
 
 /**
- * Sets up the CloSolda structured hierarchy:
- * CloSolda / Clientes / [Cliente_ID] / Projetos / [Projeto_ID] / [Etapa]
+ * Sets up the CloMec structured hierarchy:
+ * CloMec / Clientes / [Cliente_ID] / Projetos / [Projeto_ID] / [Etapa]
  */
 export async function ensureProjectStructure(
   clientName: string,
@@ -131,8 +131,8 @@ export async function ensureProjectStructure(
   if (!token) return null;
 
   try {
-    // 1. Root CloSolda folder
-    const root = await findOrCreateFolder('CloSolda', undefined, token);
+    // 1. Root CloMec folder
+    const root = await findOrCreateFolder('CloMec', undefined, token);
     if (!root) return null;
 
     // 2. Clientes folder
@@ -261,8 +261,8 @@ export async function syncAppointmentToGoogleCalendar(appointment: {
     const endIso = `${appointment.data}T${endHour}:00`;
 
     const event = {
-      summary: `CloSolda: ${appointment.tipo} - ${appointment.clientNome}`,
-      description: appointment.descricao || `Compromisso agendado com ${appointment.clientNome} pela CloSolda.`,
+      summary: `CloMec: ${appointment.tipo} - ${appointment.clientNome}`,
+      description: appointment.descricao || `Compromisso agendado com ${appointment.clientNome} pela CloMec.`,
       location: appointment.endereco || '',
       start: {
         dateTime: new Date(startIso).toISOString(),

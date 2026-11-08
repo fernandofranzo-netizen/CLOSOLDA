@@ -71,7 +71,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8500]/20 border border-[#FF8500]/40 text-[#FF8500] text-xs font-bold uppercase tracking-wider mb-3">
             <span className="w-2 h-2 rounded-full bg-[#FF8500] animate-ping" />
-            Painel Operacional CloSolda
+            Painel Operacional CloMec
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-industrial tracking-wide">
             Qualidade, Segurança e Compromisso

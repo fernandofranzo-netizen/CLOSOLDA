@@ -90,7 +90,7 @@ export const DesktopSidebar: React.FC<NavigationProps> = ({
 
       {/* Industrial Footer Tag */}
       <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-500 font-mono-code flex items-center justify-between">
-        <span>CloSolda v2.6.4</span>
+        <span>CloMec v2.6.4</span>
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
       </div>
     </aside>

@@ -20,6 +20,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { openWhatsAppChat } from '../../services/whatsappService';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface DocumentsModuleProps {
   documents: DocumentRecord[];
@@ -77,7 +78,7 @@ export const DocumentsModule: React.FC<DocumentsModuleProps> = ({
   const handleShareDoc = (doc: DocumentRecord) => {
     const client = clients.find((c) => c.id === doc.clientId);
     const phone = client?.whatsapp || client?.telefone;
-    const msg = `Olá, ${doc.clientNome}! Segue o link/referência do documento *${doc.titulo}* (${doc.numeroRef || ''}) da *CloSolda*.`;
+    const msg = `Olá, ${doc.clientNome}! Segue o link/referência do documento *${doc.titulo}* (${doc.numeroRef || ''}) da *CloMec*.`;
     if (phone) {
       openWhatsAppChat(phone, msg);
     } else {
@@ -235,11 +236,11 @@ export const DocumentsModule: React.FC<DocumentsModuleProps> = ({
 
                 <button
                   onClick={() => handleShareDoc(doc)}
-                  className="p-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-500/30 transition text-xs flex items-center gap-1"
-                  title="Compartilhar"
+                  className="p-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] transition text-xs flex items-center gap-1.5 font-semibold group shadow-sm"
+                  title="Compartilhar via WhatsApp"
                 >
-                  <Share2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Compartilhar</span>
+                  <WhatsAppIcon variant="official" className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <span className="hidden sm:inline">WhatsApp</span>
                 </button>
 
                 <button

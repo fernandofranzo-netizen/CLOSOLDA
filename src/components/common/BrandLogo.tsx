@@ -31,7 +31,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <div className={`relative flex-shrink-0 ${iconSizes[size]} rounded-xl overflow-hidden bg-gradient-to-br from-[#071B35] via-[#0B2548] to-[#123F70] p-1 border border-[#FF8500]/40 shadow-lg shadow-[#FF8500]/10`}>
         <img
           src="/icon.svg"
-          alt="CloSolda Logo"
+          alt="CloMec Logo"
           className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(255,133,0,0.5)]"
         />
       </div>
@@ -39,7 +39,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <div className="flex flex-col">
         <div className={`font-black tracking-wider leading-none font-industrial ${textSizes[size]}`}>
           <span className="text-white">CLO</span>
-          <span className="text-[#FF8500]">SOLDA</span>
+          <span className="text-[#FF8500]">MEC</span>
         </div>
         {showSlogan && (
           <span className="text-[10px] sm:text-xs font-semibold text-[#AEB8C4] tracking-widest uppercase mt-0.5 font-industrial">

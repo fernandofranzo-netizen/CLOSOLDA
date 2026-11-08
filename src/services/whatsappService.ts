@@ -17,7 +17,7 @@ export function openWhatsAppChat(phone: string, message: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-export function formatQuoteMessage(client: { nome: string }, quote: Quote): string {
+export function formatQuoteMessage(client: { nome: string }, quote: Quote, docLink?: string): string {
   const formattedTotal = quote.valorTotal.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -25,35 +25,36 @@ export function formatQuoteMessage(client: { nome: string }, quote: Quote): stri
 
   return `Olá, ${client.nome}!
 
-Segue o orçamento *${quote.numero}* referente ao serviço solicitado à *CloSolda*:
+Segue o orçamento *${quote.numero}* referente ao serviço solicitado à *CloMec*:
 
 📋 *Serviço:* ${quote.descricaoServico}
 💰 *Valor Total:* ${formattedTotal}
 📅 *Validade:* ${quote.validade ? new Date(quote.validade).toLocaleDateString('pt-BR') : '15 dias'}
 💳 *Condições:* ${quote.condicoesPagamento || 'A combinar'}
+${docLink ? `\n🔗 *Acesse o PDF Oficial Online:* ${docLink}\n` : ''}
+📄 *Documento Oficial em Anexo:* Segue em anexo o arquivo oficial em PDF (.PDF) contendo o detalhamento de materiais, custos, etapas e garantias CloMec.
 
-O PDF detalhado e oficial do orçamento foi gerado com todas as especificações técnicas, materiais e garantias.
 Fico à disposição para esclarecer qualquer dúvida ou agendar o início dos trabalhos!
 
 Atenciosamente,
-*CloSolda — Serviços de Soldagem*
+*CloMec — Serviços Especializados e Metalmecânica*
 Qualidade, Segurança e Compromisso`;
 }
 
-export function formatReportMessage(client: { nome: string }, report: TechnicalReport): string {
+export function formatReportMessage(client: { nome: string }, report: TechnicalReport, docLink?: string): string {
   return `Olá, ${client.nome}!
 
-Segue a notificação do *Relatório Técnico de Execução (${report.numero})* emitido pela *CloSolda*:
+Segue a notificação do *Relatório Técnico de Execução (${report.numero})* emitido pela *CloMec*:
 
 🔍 *Objetivo:* ${report.objetivo}
 🔧 *Responsável Técnico:* ${report.responsavelNome}
 ✅ *Situação:* ${report.situacaoFinal}
 📅 *Data de Conclusão:* ${report.dataConclusao ? new Date(report.dataConclusao).toLocaleDateString('pt-BR') : 'Concluído'}
-
-O laudo técnico completo em PDF contendo registros fotográficos (Antes, Durante e Depois) e especificações foi anexado.
+${docLink ? `\n🔗 *Acesse o Laudo em PDF Online:* ${docLink}\n` : ''}
+📄 *Documento Oficial em Anexo:* Segue em anexo o Laudo Técnico completo em formato PDF (.PDF) contendo os registros fotográficos (Antes, Durante e Depois) e as especificações de soldagem.
 
 Atenciosamente,
-*CloSolda — Serviços de Soldagem*
+*CloMec — Serviços Especializados e Metalmecânica*
 Qualidade, Segurança e Compromisso`;
 }
 
@@ -61,7 +62,7 @@ export function formatAppointmentMessage(client: { nome: string }, appointment: 
   const formattedDate = new Date(appointment.data + 'T12:00:00').toLocaleDateString('pt-BR');
   return `Olá, ${client.nome}!
 
-Confirmamos o seu agendamento com a *CloSolda*:
+Confirmamos o seu agendamento com a *CloMec*:
 
 📅 *Data:* ${formattedDate}
 ⏰ *Horário:* às ${appointment.horarioInicio}${appointment.horarioFim ? ` até ${appointment.horarioFim}` : ''}
@@ -71,20 +72,94 @@ Confirmamos o seu agendamento com a *CloSolda*:
 ${appointment.descricao ? `ℹ️ *Detalhes:* ${appointment.descricao}\n` : ''}Caso precise reagendar ou tiver alguma dúvida, basta nos responder por aqui!
 
 Atenciosamente,
-*CloSolda — Serviços de Soldagem*
+*CloMec — Serviços Especializados e Metalmecânica*
 Qualidade, Segurança e Compromisso`;
 }
 
 export function formatServiceCompletedMessage(client: { nome: string }, projectName: string, projectCode: string): string {
   return `Olá, ${client.nome}!
 
-Temos a satisfação de informar que o serviço referente ao projeto *${projectCode} - ${projectName}* foi concluído com sucesso e rigoroso padrão de qualidade pela equipe *CloSolda*! ⚡🛠️
+Temos a satisfação de informar que o serviço referente ao projeto *${projectCode} - ${projectName}* foi concluído com sucesso e rigoroso padrão de qualidade pela equipe *CloMec*! ⚡🛠️
 
 Agradecemos pela confiança em nosso trabalho. Estamos à disposição para futuras demandas e manutenções.
 
 Atenciosamente,
-*CloSolda — Serviços de Soldagem*
+*CloMec — Serviços Especializados e Metalmecânica*
 Qualidade, Segurança e Compromisso`;
+}
+
+export interface ShareAttachmentResult {
+  sharedNatively: boolean;
+  fileName: string;
+}
+
+/**
+ * Shares Quote via WhatsApp with PDF attached natively on supported platforms (PWA / Mobile / WebShare).
+ * On desktop or browsers without file share support, triggers download and opens WhatsApp Web.
+ */
+export async function shareQuoteWithPdfAttachment(
+  client: { nome: string; whatsapp?: string; telefone?: string },
+  quote: Quote,
+  pdfFile: File,
+  docLink?: string
+): Promise<ShareAttachmentResult> {
+  const message = formatQuoteMessage(client, quote, docLink);
+  const phone = client.whatsapp || client.telefone || '';
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    try {
+      await navigator.share({
+        files: [pdfFile],
+        title: `Orçamento Oficial ${quote.numero} - CloMec`,
+        text: message,
+      });
+      return { sharedNatively: true, fileName: pdfFile.name };
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        return { sharedNatively: true, fileName: pdfFile.name };
+      }
+      console.warn('Native share failed, falling back to WhatsApp Web URL:', error);
+    }
+  }
+
+  if (phone) {
+    openWhatsAppChat(phone, message);
+  }
+  return { sharedNatively: false, fileName: pdfFile.name };
+}
+
+/**
+ * Shares Technical Report via WhatsApp with PDF attached.
+ */
+export async function shareReportWithPdfAttachment(
+  client: { nome: string; whatsapp?: string; telefone?: string },
+  report: TechnicalReport,
+  pdfFile: File,
+  docLink?: string
+): Promise<ShareAttachmentResult> {
+  const message = formatReportMessage(client, report, docLink);
+  const phone = client.whatsapp || client.telefone || '';
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    try {
+      await navigator.share({
+        files: [pdfFile],
+        title: `Laudo Técnico Oficial ${report.numero} - CloMec`,
+        text: message,
+      });
+      return { sharedNatively: true, fileName: pdfFile.name };
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        return { sharedNatively: true, fileName: pdfFile.name };
+      }
+      console.warn('Native share failed, falling back to WhatsApp Web URL:', error);
+    }
+  }
+
+  if (phone) {
+    openWhatsAppChat(phone, message);
+  }
+  return { sharedNatively: false, fileName: pdfFile.name };
 }
 
 export async function shareFileNative(file: File, title: string, text: string): Promise<boolean> {

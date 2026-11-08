@@ -54,7 +54,7 @@ export const Header: React.FC<{ activeTabTitle?: string }> = ({ activeTabTitle }
                 </span>
                 <span className="text-[10px] text-[#FF8500] font-semibold flex items-center justify-end gap-1">
                   <ShieldCheck className="w-3 h-3" />
-                  Admin CloSolda
+                  Admin CloMec
                 </span>
               </div>
 

@@ -127,7 +127,7 @@ const MainApp: React.FC = () => {
         <BrandLogo size="xl" showSlogan={true} className="animate-pulse" />
         <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-[#FF8500] font-industrial uppercase tracking-widest">
           <span className="w-2.5 h-2.5 rounded-full bg-[#FF8500] animate-ping" />
-          <span>Iniciando Sistema CloSolda...</span>
+          <span>Iniciando Sistema CloMec...</span>
         </div>
       </div>
     );

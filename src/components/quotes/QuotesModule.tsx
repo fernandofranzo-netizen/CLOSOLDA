@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Quote,
   QuoteItem,
@@ -12,7 +12,6 @@ import {
   Plus,
   Search,
   FileDown,
-  MessageCircle,
   Copy,
   CheckCircle,
   Clock,
@@ -26,7 +25,8 @@ import {
   CheckCheck,
 } from 'lucide-react';
 import { generateQuotePDF } from '../../services/pdfService';
-import { openWhatsAppChat, formatQuoteMessage } from '../../services/whatsappService';
+import { openWhatsAppChat, formatQuoteMessage, shareQuoteWithPdfAttachment } from '../../services/whatsappService';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface QuotesModuleProps {
   quotes: Quote[];
@@ -127,6 +127,17 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
 
   const [formData, setFormData] = useState(initialFormState);
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [whatsappNotice, setWhatsappNotice] = useState<{
+    clientNome: string;
+    fileName: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (whatsappNotice) {
+      const timer = setTimeout(() => setWhatsappNotice(null), 7000);
+      return () => clearTimeout(timer);
+    }
+  }, [whatsappNotice]);
 
   // Recalculate totals whenever items or discounts change
   const recalculateTotals = (items: QuoteItem[], desc: number, acre: number) => {
@@ -275,7 +286,7 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
   const handleGeneratePDF = async (quote: Quote) => {
     try {
       const doc = generateQuotePDF(quote, settings);
-      const fileName = `Orcamento_${quote.numero}_CloSolda.pdf`;
+      const fileName = `Orcamento_${quote.numero}_CloMec.pdf`;
       doc.save(fileName);
 
       // Register document record in library
@@ -297,14 +308,96 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
     }
   };
 
-  const handleShareWhatsApp = (quote: Quote) => {
+  const buildQuoteFromCurrentForm = (): Quote => {
+    const client = clients.find((c) => c.id === formData.clientId);
+    const currentTotals = recalculateTotals(
+      formData.itens,
+      Number(formData.desconto) || 0,
+      Number(formData.acrescimo) || 0
+    );
+
+    return {
+      id: editingQuote?.id || 'temp-id',
+      numero: formData.numero,
+      clientId: formData.clientId,
+      clientNome: client?.nome || formData.clientNome || 'Cliente',
+      clientTelefone: client?.telefone || formData.clientTelefone || '',
+      clientWhatsapp: client?.whatsapp || formData.clientWhatsapp || '',
+      clientEndereco: client?.endereco
+        ? `${client.endereco}, ${client.numero || ''}`
+        : formData.clientEndereco || '',
+      dataEmissao: formData.dataEmissao,
+      validade: formData.validade,
+      descricaoServico: formData.descricaoServico || 'Serviços Especializados CloMec',
+      localExecucao: formData.localExecucao || '',
+      prazoEstimado: formData.prazoEstimado || '',
+      condicoesPagamento: formData.condicoesPagamento || '',
+      itens: formData.itens,
+      subtotal: currentTotals.subtotal,
+      desconto: Number(formData.desconto) || 0,
+      acrescimo: Number(formData.acrescimo) || 0,
+      valorTotal: currentTotals.valorTotal,
+      status: formData.status,
+      observacoesComerciais: formData.observacoesComerciais || '',
+      createdBy: editingQuote?.createdBy || '',
+      createdAt: editingQuote?.createdAt || new Date().toISOString(),
+    };
+  };
+
+  const handleDownloadModalQuote = () => {
+    const quote = buildQuoteFromCurrentForm();
+    handleGeneratePDF(quote);
+  };
+
+  const handleShareWhatsApp = async (quote: Quote) => {
     const phone = quote.clientWhatsapp || quote.clientTelefone;
     if (!phone) {
-      alert('Cliente não possui telefone cadastrado.');
+      alert('Cliente não possui telefone ou WhatsApp cadastrado.');
       return;
     }
-    const message = formatQuoteMessage({ nome: quote.clientNome }, quote);
-    openWhatsAppChat(phone, message);
+
+    try {
+      // 1. Generate official PDF
+      const doc = generateQuotePDF(quote, settings);
+      const pdfBlob = doc.output('blob');
+      const fileName = `Orcamento_${quote.numero}_CloMec.pdf`;
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+      // 2. Register document in repository if prop provided
+      if (onRegisterDocument) {
+        await onRegisterDocument({
+          clientId: quote.clientId,
+          clientNome: quote.clientNome,
+          tipo: 'Orçamento',
+          titulo: `Orçamento Oficial ${quote.numero}`,
+          numeroRef: quote.numero,
+          data: quote.dataEmissao,
+          createdBy: '',
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // 3. Share with PDF as attachment
+      const result = await shareQuoteWithPdfAttachment(
+        { nome: quote.clientNome, whatsapp: quote.clientWhatsapp, telefone: quote.clientTelefone },
+        quote,
+        pdfFile
+      );
+
+      // 4. On desktop / WhatsApp Web (where native file sharing is not supported by the browser sandbox),
+      // we download the PDF automatically and notify the user to attach or drag it into WhatsApp.
+      if (!result.sharedNatively) {
+        doc.save(fileName);
+        setWhatsappNotice({
+          clientNome: quote.clientNome,
+          fileName,
+        });
+      }
+    } catch (err) {
+      console.error('Error sharing quote via WhatsApp with PDF:', err);
+      const message = formatQuoteMessage({ nome: quote.clientNome }, quote);
+      openWhatsAppChat(phone, message);
+    }
   };
 
   const handleConfirmApproval = async () => {
@@ -344,7 +437,7 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
             Gerenciador de Orçamentos
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Elaboração comercial com cálculo de custos, tabela de itens, PDF CloSolda e aprovação.
+            Elaboração comercial com cálculo de custos, tabela de itens, PDF CloMec e aprovação.
           </p>
         </div>
 
@@ -396,7 +489,7 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             {searchTerm || statusFilter !== 'all'
               ? 'Tente remover os filtros da pesquisa.'
-              : 'Clique no botão acima para criar a primeira proposta comercial da CloSolda.'}
+              : 'Clique no botão acima para criar a primeira proposta comercial da CloMec.'}
           </p>
         </div>
       ) : (
@@ -462,20 +555,20 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
                     {/* PDF Generator */}
                     <button
                       onClick={() => handleGeneratePDF(quote)}
-                      title="Gerar e Baixar PDF CloSolda"
+                      title="Gerar e Baixar PDF CloMec"
                       className="p-2 rounded-xl bg-[#123F70] hover:bg-[#1A528F] text-white transition flex items-center gap-1 text-xs font-semibold"
                     >
                       <FileDown className="w-4 h-4 text-[#FF8500]" />
                       <span className="hidden sm:inline">PDF</span>
                     </button>
 
-                    {/* WhatsApp */}
+                    {/* WhatsApp with PDF attachment */}
                     <button
                       onClick={() => handleShareWhatsApp(quote)}
-                      title="Enviar Proposta por WhatsApp"
-                      className="p-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-500/30 transition"
+                      title="Enviar Proposta com PDF Oficial Anexo via WhatsApp"
+                      className="p-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 transition flex items-center justify-center group shadow-sm"
                     >
-                      <MessageCircle className="w-4 h-4" />
+                      <WhatsAppIcon variant="official" className="w-4 h-4 transition-transform group-hover:scale-110" />
                     </button>
 
                     {/* Approve Register */}
@@ -535,12 +628,12 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-[#FF8500]" />
                 <h2 className="text-lg font-bold font-industrial">
-                  {editingQuote ? `Editar Orçamento ${editingQuote.numero}` : 'Gerador Profissional de Orçamento CloSolda'}
+                  {editingQuote ? `Editar Orçamento ${editingQuote.numero}` : 'Gerador Profissional de Orçamento CloMec'}
                 </h2>
               </div>
               <button
                 onClick={() => setIsEditorOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -653,7 +746,7 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
                     type="text"
                     value={formData.localExecucao}
                     onChange={(e) => setFormData({ ...formData, localExecucao: e.target.value })}
-                    placeholder="Endereço da obra ou oficina CloSolda"
+                    placeholder="Endereço da obra ou oficina CloMec"
                     className="w-full px-3 py-2 bg-[#0B213F] border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-[#FF8500]"
                   />
                 </div>
@@ -853,21 +946,35 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
               </div>
 
               {/* Form Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsEditorOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={formSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#FF8500] hover:bg-[#E67600] text-slate-950 text-xs font-bold shadow-md transition disabled:opacity-60"
-                >
-                  {formSubmitting ? 'Salvando...' : editingQuote ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
-                </button>
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadModalQuote}
+                    className="px-4 py-2.5 rounded-xl bg-[#123F70] hover:bg-[#1A528F] text-white text-xs font-semibold transition flex items-center gap-2 border border-blue-400/30 shadow-sm"
+                    title="Baixar arquivo .PDF do orçamento"
+                  >
+                    <FileDown className="w-4 h-4 text-[#FF8500]" />
+                    <span>Baixar .PDF</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditorOpen(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={formSubmitting}
+                    className="px-6 py-2.5 rounded-xl bg-[#FF8500] hover:bg-[#E67600] text-slate-950 text-xs font-bold shadow-md transition disabled:opacity-60"
+                  >
+                    {formSubmitting ? 'Salvando...' : editingQuote ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -960,6 +1067,33 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* WHATSAPP PDF ATTACHMENT NOTICE TOAST */}
+      {whatsappNotice && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-2xl bg-[#0B213F] border border-[#25D366]/40 shadow-2xl text-slate-100 flex items-start gap-3">
+          <div className="p-2 rounded-xl bg-[#25D366]/20 text-[#25D366] shrink-0 mt-0.5">
+            <WhatsAppIcon variant="official" className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-xs">
+            <h4 className="font-bold text-white text-sm flex items-center gap-1.5 font-industrial">
+              <span>PDF Oficial Pronto para Envio</span>
+            </h4>
+            <p className="text-slate-300 mt-1 leading-relaxed">
+              O arquivo oficial <span className="font-mono-code font-bold text-[#FF8500]">{whatsappNotice.fileName}</span> foi baixado no seu dispositivo e o WhatsApp aberto para <strong className="text-white">{whatsappNotice.clientNome}</strong>.
+            </p>
+            <p className="text-emerald-400 mt-1.5 font-semibold flex items-center gap-1">
+              <span>📎</span>
+              <span>Basta anexar ou arrastar o PDF para a conversa no WhatsApp!</span>
+            </p>
+          </div>
+          <button
+            onClick={() => setWhatsappNotice(null)}
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

@@ -121,11 +121,11 @@
     <circle cx="136" cy="10" r="6" fill="#071B35" />
   </g>
 
-  <!-- BRAND NAME "CLOSOLDA" -->
+  <!-- BRAND NAME "CLOMEC" -->
   <g transform="translate(256, 452)">
-    <!-- CloSolda Text with Industrial Bold Typography -->
+    <!-- CloMec Text with Industrial Bold Typography -->
     <text x="0" y="0" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" letter-spacing="4" fill="#FFFFFF">
-      CLO<tspan fill="#FF8500">SOLDA</tspan>
+      CLO<tspan fill="#FF8500">MEC</tspan>
     </text>
     <!-- Slogan / Subtitle -->
     <text x="0" y="24" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="3.5" fill="#AEB8C4">

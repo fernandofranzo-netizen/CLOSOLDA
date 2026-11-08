@@ -12,7 +12,6 @@ import {
   Plus,
   Search,
   FileDown,
-  MessageCircle,
   Eye,
   Trash2,
   Edit2,
@@ -23,7 +22,8 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { generateReportPDF } from '../../services/pdfService';
-import { openWhatsAppChat, formatReportMessage } from '../../services/whatsappService';
+import { openWhatsAppChat, formatReportMessage, shareReportWithPdfAttachment } from '../../services/whatsappService';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface ReportsModuleProps {
   reports: TechnicalReport[];
@@ -71,7 +71,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
     clientId: defaultProject?.clientId || '',
     clientNome: defaultProject?.clientNome || '',
     data: new Date().toISOString().split('T')[0],
-    localExecucao: defaultProject?.enderecoExecucao || 'Oficina técnica CloSolda',
+    localExecucao: defaultProject?.enderecoExecucao || 'Oficina técnica CloMec',
     objetivo: 'Inspeção, reparo e reforço estrutural com soldagem de alta penetração.',
     situacaoEncontrada: 'Estrutura metálica apresentando trincas por fadiga e desgaste mecânico nos pontos de união originais.',
     atividades: 'Esmerilhamento das trincas, abertura de chanfro a 60°, pré-aquecimento localizado, soldagem multipasse e acabamento mecânico.',
@@ -81,7 +81,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
     observacoes: 'Ensaio visual (VT) e ensaio por líquido penetrante (PT) realizados nos cordões principais, sem descontinuidades reprováveis.',
     pendencias: 'Nenhuma pendência técnica. Obra liberada para uso e carregamento de carga.',
     recomendacoes: 'Recomenda-se realizar inspeção visual preventiva semestral nas juntas submetidas a esforço dinâmico.',
-    situacaoFinal: 'Serviço concluído com total aprovação técnica e conformidade aos padrões CloSolda de qualidade e segurança.',
+    situacaoFinal: 'Serviço concluído com total aprovação técnica e conformidade aos padrões CloMec de qualidade e segurança.',
     dataConclusao: new Date().toISOString().split('T')[0],
     responsavelNome: settings?.responsavelNome || 'Clodoaldo Soldador Especialista',
     responsavelCargo: settings?.responsavelCargo || 'Supervisor Técnico de Soldagem',
@@ -178,7 +178,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
     try {
       const relatedPhotos = photos.filter((p) => p.projectId === report.projectId);
       const doc = generateReportPDF(report, relatedPhotos, settings);
-      const fileName = `LaudoTecnico_${report.numero}_CloSolda.pdf`;
+      const fileName = `LaudoTecnico_${report.numero}_CloMec.pdf`;
       doc.save(fileName);
 
       if (onRegisterDocument) {
@@ -201,15 +201,35 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
     }
   };
 
-  const handleShareWhatsApp = (report: TechnicalReport) => {
+  const handleShareWhatsApp = async (report: TechnicalReport) => {
     const client = clients.find((c) => c.id === report.clientId);
     const phone = client?.whatsapp || client?.telefone;
     if (!phone) {
       alert('Telefone do cliente não encontrado.');
       return;
     }
-    const message = formatReportMessage({ nome: report.clientNome }, report);
-    openWhatsAppChat(phone, message);
+
+    try {
+      const relatedPhotos = photos.filter((p) => p.projectId === report.projectId);
+      const doc = generateReportPDF(report, relatedPhotos, settings);
+      const pdfBlob = doc.output('blob');
+      const fileName = `LaudoTecnico_${report.numero}_CloMec.pdf`;
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+      const result = await shareReportWithPdfAttachment(
+        { nome: report.clientNome, whatsapp: client?.whatsapp, telefone: client?.telefone },
+        report,
+        pdfFile
+      );
+
+      if (!result.sharedNatively) {
+        doc.save(fileName);
+      }
+    } catch (err) {
+      console.error('Error sharing report via WhatsApp with PDF:', err);
+      const message = formatReportMessage({ nome: report.clientNome }, report);
+      openWhatsAppChat(phone, message);
+    }
   };
 
   const filteredReports = reports.filter((r) => {
@@ -331,10 +351,10 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                 {/* WhatsApp */}
                 <button
                   onClick={() => handleShareWhatsApp(report)}
-                  title="Enviar por WhatsApp"
-                  className="p-2 rounded-xl bg-emerald-950/80 text-emerald-400 hover:bg-emerald-900 border border-emerald-500/30 transition"
+                  title="Enviar Laudo por WhatsApp"
+                  className="p-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 transition flex items-center justify-center group shadow-sm"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <WhatsAppIcon variant="official" className="w-4 h-4 transition-transform group-hover:scale-110" />
                 </button>
 
                 {/* Edit */}
@@ -439,7 +459,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
               <div className="pt-6 grid grid-cols-2 gap-8 text-center text-[10px]">
                 <div className="border-t border-slate-400 pt-1">
                   <strong>{previewReport.responsavelNome}</strong>
-                  <span className="block text-slate-500">Responsável Técnico / CloSolda</span>
+                  <span className="block text-slate-500">Responsável Técnico / CloMec</span>
                 </div>
                 <div className="border-t border-slate-400 pt-1">
                   <strong>{previewReport.clientNome}</strong>
@@ -479,7 +499,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
               <div className="flex items-center gap-2">
                 <FileCheck2 className="w-5 h-5 text-[#FF8500]" />
                 <h2 className="text-lg font-bold font-industrial">
-                  {editingReport ? `Editar Relatório ${editingReport.numero}` : 'Emissão de Relatório Técnico CloSolda'}
+                  {editingReport ? `Editar Relatório ${editingReport.numero}` : 'Emissão de Relatório Técnico CloMec'}
                 </h2>
               </div>
               <button

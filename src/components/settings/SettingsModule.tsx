@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { signInWithGoogle, getCachedGoogleAccessToken } from '../../services/firebase';
 import { ensureProjectStructure } from '../../services/driveService';
 
@@ -29,12 +30,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
   onSaveSettings,
 }) => {
   const initialFormState: CompanySettings = {
-    razaoSocial: settings?.razaoSocial || 'CloSolda Serviços Especializados de Soldagem ME',
-    nomeFantasia: settings?.nomeFantasia || 'CloSolda',
+    razaoSocial: settings?.razaoSocial || 'CloMec Serviços Especializados e Metalmecânica ME',
+    nomeFantasia: settings?.nomeFantasia || 'CloMec',
     cnpjCpf: settings?.cnpjCpf || '45.123.456/0001-89',
     telefone: settings?.telefone || '(11) 98765-4321',
     whatsapp: settings?.whatsapp || '11987654321',
-    email: settings?.email || 'contato@closolda.com.br',
+    email: settings?.email || 'contato@clomec.com.br',
     endereco: settings?.endereco || 'Avenida Industrial Metalúrgica, 1500 - Galpão 03',
     cidade: settings?.cidade || 'São Paulo',
     estado: settings?.estado || 'SP',
@@ -83,8 +84,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
     setDriveMsg(null);
     try {
       await signInWithGoogle();
-      // Ensure root folder CloSolda
-      const structure = await ensureProjectStructure('CloSolda Geral', 'admin', 'ROOT', 'init');
+      // Ensure root folder CloMec
+      const structure = await ensureProjectStructure('CloMec Geral', 'admin', 'ROOT', 'init');
       if (structure?.rootFolderId) {
         await onSaveSettings({
           driveFolderPrincipalId: structure.rootFolderId,
@@ -92,7 +93,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
           calendarAccountConnected: true,
         });
       }
-      setDriveMsg('Conta Google conectada com sucesso! Pasta principal "CloSolda" pronta para armazenar fotos e laudos.');
+      setDriveMsg('Conta Google conectada com sucesso! Pasta principal "CloMec" pronta para armazenar fotos e laudos.');
     } catch (error) {
       console.error('Error connecting Google Drive:', error);
       setDriveMsg('Não foi possível conectar a conta Google. Tente novamente.');
@@ -111,7 +112,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             Configurações da Empresa
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Dados comerciais da CloSolda, dados bancários, PIX, condições contratuais e integração com Google Drive/Agenda.
+            Dados comerciais da CloMec, dados bancários, PIX, condições contratuais e integração com Google Drive/Agenda.
           </p>
         </div>
 
@@ -169,7 +170,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
           <div className="p-3.5 rounded-2xl bg-[#071B35] border border-slate-800">
             <span className="font-bold text-white block mb-1">📁 Estrutura de Pastas Automatizada:</span>
             <code className="text-[11px] text-[#FF8500] font-mono-code block whitespace-pre">
-              CloSolda/Clientes/Cliente_001/Projetos/Projeto_001/Antes/Durante/Depois/
+              CloMec/Clientes/Cliente_001/Projetos/Projeto_001/Antes/Durante/Depois/
             </code>
           </div>
 
@@ -268,8 +269,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 font-industrial">
-                WhatsApp de Atendimento *
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 font-industrial">
+                <WhatsAppIcon variant="official" className="w-3.5 h-3.5" />
+                <span>WhatsApp de Atendimento *</span>
               </label>
               <input
                 type="text"
