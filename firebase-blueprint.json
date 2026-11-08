@@ -1,0 +1,871 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Administrator user profile in CloSolda",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Administrator email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full name of administrator"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"],
+          "description": "Role of the user, restricted to admin"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Record creation timestamp"
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Customer registry for residential and industrial welding clients",
+      "type": "object",
+      "properties": {
+        "nome": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 150,
+          "description": "Full name or corporate trade name"
+        },
+        "cpfCnpj": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "CPF or CNPJ document number"
+        },
+        "telefone": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Contact telephone number"
+        },
+        "whatsapp": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "WhatsApp contact number with country/area code"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Email address"
+        },
+        "cep": {
+          "type": "string",
+          "maxLength": 15,
+          "description": "Postal code"
+        },
+        "endereco": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Street address"
+        },
+        "numero": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Address number"
+        },
+        "bairro": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Neighborhood"
+        },
+        "cidade": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "City"
+        },
+        "estado": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "State code or province"
+        },
+        "complemento": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Address complement"
+        },
+        "observacoes": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "General customer notes"
+        },
+        "driveFolderId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive folder ID for this client"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "UID of administrator who created record"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["nome", "telefone", "whatsapp", "cidade", "estado", "createdBy", "createdAt"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Scheduling for technical visits, quotes, and welding execution",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "Reference ID to Client"
+        },
+        "clientNome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Cached client name"
+        },
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "Visita técnica",
+            "Elaboração de orçamento",
+            "Execução de soldagem",
+            "Manutenção",
+            "Entrega de serviço",
+            "Retorno ao cliente"
+          ],
+          "description": "Type of appointment"
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Date formatted YYYY-MM-DD"
+        },
+        "horarioInicio": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Start time HH:MM"
+        },
+        "horarioFim": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "End time HH:MM"
+        },
+        "endereco": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Execution location address"
+        },
+        "descricao": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Detailed agenda description"
+        },
+        "observacoes": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Internal notes"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pendente", "Confirmado", "Em andamento", "Concluído", "Cancelado"],
+          "description": "Appointment status"
+        },
+        "googleEventId": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Google Calendar synced event ID"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["clientId", "clientNome", "tipo", "data", "horarioInicio", "status", "createdBy", "createdAt"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Commercial proposals and welding quotes with itemized costs",
+      "type": "object",
+      "properties": {
+        "numero": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Sequential quote code (e.g. ORC-2026-001)"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to Client"
+        },
+        "clientNome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Client name"
+        },
+        "dataEmissao": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Issue date YYYY-MM-DD"
+        },
+        "validade": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Validity expiration date YYYY-MM-DD"
+        },
+        "descricaoServico": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Description of requested service"
+        },
+        "localExecucao": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Service execution address"
+        },
+        "prazoEstimado": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Estimated delivery timeframe"
+        },
+        "condicoesPagamento": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Payment terms (e.g. 50% upfront, balance on completion)"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Sum of all line items"
+        },
+        "desconto": {
+          "type": "number",
+          "description": "Discount value"
+        },
+        "acrescimo": {
+          "type": "number",
+          "description": "Additional charges value"
+        },
+        "valorTotal": {
+          "type": "number",
+          "description": "Final computed total price"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Rascunho", "Enviado", "Aguardando aprovação", "Aprovado", "Reprovado", "Expirado"],
+          "description": "Quote lifecycle status"
+        },
+        "aprovadoEm": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Date/time client approved"
+        },
+        "observacoesAprovacao": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Client approval remarks"
+        },
+        "drivePdfId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive PDF file ID"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["numero", "clientId", "clientNome", "dataEmissao", "descricaoServico", "valorTotal", "status", "createdBy", "createdAt"]
+    },
+    "QuoteItem": {
+      "title": "QuoteItem",
+      "description": "Itemized cost line item inside a quote",
+      "type": "object",
+      "properties": {
+        "quoteId": {
+          "type": "string",
+          "description": "Parent quote ID"
+        },
+        "descricao": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Item description"
+        },
+        "categoria": {
+          "type": "string",
+          "enum": [
+            "Mão de obra",
+            "Materiais",
+            "Consumíveis de soldagem",
+            "Deslocamento",
+            "Equipamentos",
+            "Serviços terceirizados",
+            "Outros custos"
+          ],
+          "description": "Expense category"
+        },
+        "quantidade": {
+          "type": "number",
+          "description": "Quantity"
+        },
+        "unidade": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Unit (un, m, kg, h, diária, etc.)"
+        },
+        "valorUnitario": {
+          "type": "number",
+          "description": "Unit price"
+        },
+        "valorTotal": {
+          "type": "number",
+          "description": "Calculated total quantity * unit price"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["quoteId", "descricao", "categoria", "quantidade", "valorUnitario", "valorTotal", "createdBy", "createdAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Welding project / work order execution record",
+      "type": "object",
+      "properties": {
+        "codigo": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Project code (e.g. PRJ-2026-001)"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Client ID reference"
+        },
+        "clientNome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Client name"
+        },
+        "quoteId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Associated quote ID"
+        },
+        "nome": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Project title"
+        },
+        "tipoServico": {
+          "type": "string",
+          "enum": [
+            "Soldagem MIG/MAG",
+            "Soldagem TIG",
+            "Soldagem eletrodo revestido",
+            "Fabricação de estruturas metálicas",
+            "Portões e grades",
+            "Corrimãos e guarda-corpos",
+            "Reparos e manutenção",
+            "Soldagem de tubulações",
+            "Serviços industriais",
+            "Serviços residenciais",
+            "Outros"
+          ],
+          "description": "Classification of welding work"
+        },
+        "enderecoExecucao": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Execution location"
+        },
+        "dataInicio": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Start date YYYY-MM-DD"
+        },
+        "previsaoConclusao": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Estimated completion date YYYY-MM-DD"
+        },
+        "dataConclusao": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Actual completion date YYYY-MM-DD"
+        },
+        "descricao": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Project technical description"
+        },
+        "materiais": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Materials used"
+        },
+        "equipamentos": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Welding and industrial equipment utilized"
+        },
+        "observacoes": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Internal notes"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Aguardando início", "Em execução", "Pausado", "Concluído", "Entregue"],
+          "description": "Execution status"
+        },
+        "driveFolderId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive folder ID for this project"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["codigo", "clientId", "clientNome", "nome", "tipoServico", "status", "createdBy", "createdAt"]
+    },
+    "ProjectPhoto": {
+      "title": "ProjectPhoto",
+      "description": "Photographic inspection evidence during welding phases",
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "description": "Parent project ID"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Client ID"
+        },
+        "etapa": {
+          "type": "string",
+          "enum": ["Antes", "Durante", "Depois"],
+          "description": "Project milestone stage"
+        },
+        "legenda": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Photo caption/description"
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Date taken YYYY-MM-DD"
+        },
+        "storageUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "URL or storage reference"
+        },
+        "driveFileId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive file ID"
+        },
+        "driveThumbnail": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Thumbnail preview link"
+        },
+        "driveFolderStage": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Drive folder reference"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["projectId", "etapa", "legenda", "data", "storageUrl", "createdBy", "createdAt"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Technical inspection and execution reports for industrial/residential welding",
+      "type": "object",
+      "properties": {
+        "numero": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Report number (e.g. REL-2026-001)"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Associated project ID"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Associated client ID"
+        },
+        "clientNome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Client name"
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Report emission date YYYY-MM-DD"
+        },
+        "localExecucao": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Service location"
+        },
+        "objetivo": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Service objective"
+        },
+        "situacaoEncontrada": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Initial state diagnosed"
+        },
+        "atividades": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Activities carried out"
+        },
+        "procedimentos": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Welding procedures and methods applied"
+        },
+        "materiais": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Consumables and base metals used"
+        },
+        "equipamentos": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Equipment used (e.g. MIG 250A, Eletrodo 7018)"
+        },
+        "observacoes": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Technical remarks"
+        },
+        "pendencias": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Identified pending points"
+        },
+        "recomendacoes": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Preventive / maintenance recommendations"
+        },
+        "situacaoFinal": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Final condition / quality clearance"
+        },
+        "dataConclusao": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Completion date YYYY-MM-DD"
+        },
+        "responsavelNome": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Name of responsible welding technician"
+        },
+        "drivePdfId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive PDF ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Em elaboração", "Finalizado"],
+          "description": "Report lifecycle status"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["numero", "projectId", "clientId", "clientNome", "data", "objetivo", "situacaoFinal", "responsavelNome", "status", "createdBy", "createdAt"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Central document library item for quotes, reports, and certifications",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "Client ID"
+        },
+        "clientNome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Client name"
+        },
+        "projectId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Optional project ID"
+        },
+        "tipo": {
+          "type": "string",
+          "enum": ["Orçamento", "Relatório técnico", "Fotografia", "Documento comercial", "Outro"],
+          "description": "Document classification"
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Document title"
+        },
+        "numeroRef": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Reference code (quote or report number)"
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Document date YYYY-MM-DD"
+        },
+        "driveFileId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Google Drive file ID"
+        },
+        "driveViewUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Google Drive web view link"
+        },
+        "downloadUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Direct download link"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["clientId", "clientNome", "tipo", "titulo", "data", "createdBy", "createdAt"]
+    },
+    "CompanySettings": {
+      "title": "CompanySettings",
+      "description": "CloSolda company commercial configuration, branding, and defaults",
+      "type": "object",
+      "properties": {
+        "razaoSocial": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Legal company name"
+        },
+        "nomeFantasia": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Trade name: CloSolda"
+        },
+        "cnpjCpf": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "CNPJ or CPF"
+        },
+        "telefone": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Commercial phone"
+        },
+        "whatsapp": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Commercial WhatsApp"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Commercial email"
+        },
+        "endereco": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Address"
+        },
+        "cidade": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "City"
+        },
+        "estado": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "State code"
+        },
+        "cep": {
+          "type": "string",
+          "maxLength": 15,
+          "description": "CEP"
+        },
+        "chavePix": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "PIX payment key"
+        },
+        "tipoPix": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "PIX key type (CPF, CNPJ, Email, Celular, Aleatória)"
+        },
+        "dadosBancarios": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Bank account info for transfer"
+        },
+        "responsavelNome": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Technical supervisor name"
+        },
+        "responsavelCargo": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Title: Soldador Responsável / Supervisor"
+        },
+        "condicoesPadrao": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Default proposal payment terms and guarantees"
+        },
+        "validadePadraoDias": {
+          "type": "number",
+          "description": "Standard quote validity in days (default 15)"
+        },
+        "proximoNumeroOrcamento": {
+          "type": "number",
+          "description": "Counter for next quote"
+        },
+        "proximoNumeroRelatorio": {
+          "type": "number",
+          "description": "Counter for next report"
+        },
+        "proximoCodigoProjeto": {
+          "type": "number",
+          "description": "Counter for next project"
+        },
+        "driveFolderPrincipalId": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Root CloSolda Google Drive folder ID"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["nomeFantasia", "telefone", "whatsapp", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "User" },
+      "description": "Administrator profiles"
+    },
+    "/clients/{clientId}": {
+      "schema": { "$ref": "Client" },
+      "description": "Client registrations"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": { "$ref": "Appointment" },
+      "description": "Service scheduling"
+    },
+    "/quotes/{quoteId}": {
+      "schema": { "$ref": "Quote" },
+      "description": "Commercial quotes"
+    },
+    "/quote_items/{itemId}": {
+      "schema": { "$ref": "QuoteItem" },
+      "description": "Itemized costs for quotes"
+    },
+    "/projects/{projectId}": {
+      "schema": { "$ref": "Project" },
+      "description": "Welding projects and execution"
+    },
+    "/project_photos/{photoId}": {
+      "schema": { "$ref": "ProjectPhoto" },
+      "description": "Project photographic documentation"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "Report" },
+      "description": "Technical inspection reports"
+    },
+    "/documents/{documentId}": {
+      "schema": { "$ref": "Document" },
+      "description": "Unified document library"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "CompanySettings" },
+      "description": "Company operational configuration"
+    }
+  }
+}

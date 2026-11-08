@@ -1,0 +1,6 @@
+{
+  "name": "CloSolda - Gestão de Serviços de Soldagem",
+  "description": "Sistema profissional de gestão para serviços de soldagem industrial e residencial. Clientes, agendamentos, orçamentos, relatórios técnicos e documentos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

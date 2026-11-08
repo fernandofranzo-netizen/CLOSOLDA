@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    function isCloSoldaAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'manutencaolaminor@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwnerOrAdmin(ownerId) {
+      return isCloSoldaAdmin() || (isSignedIn() && request.auth.uid == ownerId);
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isCloSoldaAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isCloSoldaAdmin() || (isSignedIn() && request.auth.uid == userId));
+      allow list: if isCloSoldaAdmin();
+      allow create: if isValidId(userId) && isSignedIn() && (isCloSoldaAdmin() || request.auth.uid == userId)
+                    && incoming().email is string && incoming().email.size() <= 120;
+      allow update: if isValidId(userId) && isSignedIn() && (isCloSoldaAdmin() || request.auth.uid == userId);
+      allow delete: if isCloSoldaAdmin();
+    }
+
+    // Clients collection
+    match /clients/{clientId} {
+      allow get: if isValidId(clientId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(clientId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().nome is string && incoming().nome.size() >= 2 && incoming().nome.size() <= 150
+                    && incoming().telefone is string && incoming().telefone.size() <= 30;
+      allow update: if isValidId(clientId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy
+                    && incoming().nome is string && incoming().nome.size() >= 2 && incoming().nome.size() <= 150;
+      allow delete: if isValidId(clientId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      allow get: if isValidId(appointmentId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(appointmentId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().clientId is string
+                    && incoming().status in ['Pendente', 'Confirmado', 'Em andamento', 'Concluído', 'Cancelado'];
+      allow update: if isValidId(appointmentId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(appointmentId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Quotes collection
+    match /quotes/{quoteId} {
+      allow get: if isValidId(quoteId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(quoteId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().numero is string && incoming().numero.size() <= 30
+                    && incoming().status in ['Rascunho', 'Enviado', 'Aguardando aprovação', 'Aprovado', 'Reprovado', 'Expirado'];
+      allow update: if isValidId(quoteId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(quoteId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Quote items collection
+    match /quote_items/{itemId} {
+      allow get: if isValidId(itemId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(itemId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().quoteId is string;
+      allow update: if isValidId(itemId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(itemId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Projects collection
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(projectId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().codigo is string && incoming().codigo.size() <= 30
+                    && incoming().status in ['Aguardando início', 'Em execução', 'Pausado', 'Concluído', 'Entregue'];
+      allow update: if isValidId(projectId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(projectId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Project photos collection
+    match /project_photos/{photoId} {
+      allow get: if isValidId(photoId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(photoId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().projectId is string
+                    && incoming().etapa in ['Antes', 'Durante', 'Depois'];
+      allow update: if isValidId(photoId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(photoId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Reports collection
+    match /reports/{reportId} {
+      allow get: if isValidId(reportId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(reportId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().numero is string && incoming().numero.size() <= 30
+                    && incoming().status in ['Em elaboração', 'Finalizado'];
+      allow update: if isValidId(reportId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(reportId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Documents collection
+    match /documents/{documentId} {
+      allow get: if isValidId(documentId) && isOwnerOrAdmin(resource.data.createdBy);
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(documentId) && isVerified() && incoming().createdBy == request.auth.uid
+                    && incoming().tipo is string && incoming().titulo is string;
+      allow update: if isValidId(documentId) && isVerified() && isOwnerOrAdmin(existing().createdBy)
+                    && incoming().createdBy == existing().createdBy;
+      allow delete: if isValidId(documentId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && (isCloSoldaAdmin() || (isSignedIn() && resource.data.createdBy == request.auth.uid));
+      allow list: if isSignedIn() && (isCloSoldaAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isValidId(settingId) && isVerified() && incoming().createdBy == request.auth.uid;
+      allow update: if isValidId(settingId) && isVerified() && isOwnerOrAdmin(existing().createdBy);
+      allow delete: if isValidId(settingId) && isCloSoldaAdmin();
+    }
+  }
+}

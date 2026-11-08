@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071B35" />
+      <stop offset="60%" stop-color="#0B2548" />
+      <stop offset="100%" stop-color="#123F70" />
+    </linearGradient>
+
+    <!-- Orange Arc Spark Gradient -->
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3E0" />
+      <stop offset="30%" stop-color="#FFB300" />
+      <stop offset="70%" stop-color="#FF8500" />
+      <stop offset="100%" stop-color="#E65100" />
+    </linearGradient>
+
+    <!-- Metallic Mask Gradient -->
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CFD8DC" />
+      <stop offset="45%" stop-color="#90A4AE" />
+      <stop offset="70%" stop-color="#455A64" />
+      <stop offset="100%" stop-color="#242B33" />
+    </linearGradient>
+
+    <!-- Visor Glow Gradient -->
+    <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF8500" />
+      <stop offset="50%" stop-color="#FFF9C4" />
+      <stop offset="100%" stop-color="#FF8500" />
+    </linearGradient>
+
+    <!-- Gear Metallic Rim -->
+    <linearGradient id="gearGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#546E7A" />
+      <stop offset="50%" stop-color="#37474F" />
+      <stop offset="100%" stop-color="#1E272C" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="sparkGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background with rounded industrial container -->
+  <rect width="512" height="512" rx="104" fill="url(#bgGrad)" />
+
+  <!-- Subtle industrial circuit / grid accent -->
+  <circle cx="256" cy="235" r="215" fill="none" stroke="#123F70" stroke-width="2.5" stroke-dasharray="8 8" opacity="0.6" />
+
+  <!-- INDUSTRIAL GEAR -->
+  <g transform="translate(256, 230)">
+    <!-- 12-tooth Gear -->
+    <path d="
+      M -28 -175 L 28 -175 L 35 -145 L 75 -133 L 102 -154 L 142 -122 L 128 -88 L 160 -62 L 194 -67 L 204 -22 L 180 5 L 190 40 L 218 55 L 204 98 L 168 98 L 152 130 L 168 165 L 132 188 L 100 166 L 70 182 L 58 214 L 10 216 L 2 182 L -32 182 L -44 214 L -92 216 L -104 182 L -134 166 L -166 188 L -202 165 L -186 130 L -202 98 L -238 98 L -252 55 L -224 40 L -214 5 L -238 -22 L -228 -67 L -194 -62 L -162 -88 L -176 -122 L -136 -154 L -109 -133 L -69 -145 Z
+    " fill="url(#gearGrad)" stroke="#78909C" stroke-width="3" opacity="0.45" />
+    <circle cx="0" cy="0" r="130" fill="#071B35" stroke="#FF8500" stroke-width="2" opacity="0.5" />
+  </g>
+
+  <!-- WELDING SPARKS / ELECTRIC ARC (Left and Right) -->
+  <g filter="url(#sparkGlow)">
+    <!-- Sparks Burst Right -->
+    <path d="M 330 220 L 415 175 M 345 250 L 440 235 M 335 270 L 425 295 M 320 285 L 390 340 M 340 210 L 430 140" stroke="url(#sparkGrad)" stroke-width="3.5" stroke-linecap="round" />
+    <circle cx="420" cy="170" r="5" fill="#FFE082" />
+    <circle cx="445" cy="235" r="6" fill="#FFF9C4" />
+    <circle cx="430" cy="298" r="4.5" fill="#FFB300" />
+    <circle cx="395" cy="345" r="4" fill="#FF8500" />
+    <circle cx="435" cy="138" r="5" fill="#FFCA28" />
+
+    <!-- Sparks Burst Left -->
+    <path d="M 182 220 L 97 175 M 167 250 L 72 235 M 177 270 L 87 295 M 192 285 L 122 340 M 172 210 L 82 140" stroke="url(#sparkGrad)" stroke-width="3.5" stroke-linecap="round" />
+    <circle cx="92" cy="170" r="5" fill="#FFE082" />
+    <circle cx="67" cy="235" r="6" fill="#FFF9C4" />
+    <circle cx="82" cy="298" r="4.5" fill="#FFB300" />
+    <circle cx="117" cy="345" r="4" fill="#FF8500" />
+    <circle cx="77" cy="138" r="5" fill="#FFCA28" />
+  </g>
+
+  <!-- WELDING HELMET / MÁSCARA DE SOLDADOR -->
+  <g transform="translate(256, 225)">
+    <!-- Helmet Outer Shadow & Shield -->
+    <path d="
+      M -95 -125
+      C -40 -150 40 -150 95 -125
+      C 130 -105 145 -50 142 15
+      C 140 60 128 105 105 135
+      C 80 168 45 185 0 190
+      C -45 185 -80 168 -105 135
+      C -128 105 -140 60 -142 15
+      C -145 -50 -130 -105 -95 -125 Z
+    " fill="url(#metalGrad)" stroke="#AEB8C4" stroke-width="5" />
+
+    <!-- Helmet Crown Ridge -->
+    <path d="M -45 -135 C -15 -145 15 -145 45 -135 L 35 -60 L -35 -60 Z" fill="#242B33" opacity="0.6" />
+    <line x1="0" y1="-142" x2="0" y2="-60" stroke="#FF8500" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Protective Outer Bezel of Visor -->
+    <rect x="-76" y="-38" width="152" height="76" rx="14" fill="#071B35" stroke="#FF8500" stroke-width="4.5" />
+
+    <!-- Auto-Darkening Welding Filter Visor (Glowing Lens) -->
+    <rect x="-66" y="-28" width="132" height="56" rx="8" fill="url(#visorGrad)" filter="url(#glow)" />
+    <!-- Center Bright Welding Arc Core in Visor -->
+    <ellipse cx="0" cy="0" rx="42" ry="16" fill="#FFFFFF" opacity="0.9" filter="url(#glow)" />
+
+    <!-- Lower Chin Shield / Aerodynamic vents -->
+    <path d="M -55 75 L -15 145 L 15 145 L 55 75 Z" fill="#1C242D" stroke="#546E7A" stroke-width="2.5" />
+    <line x1="-30" y1="95" x2="30" y2="95" stroke="#FF8500" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+    <line x1="-22" y1="112" x2="22" y2="112" stroke="#AEB8C4" stroke-width="2.5" stroke-linecap="round" opacity="0.7" />
+    <line x1="-12" y1="128" x2="12" y2="128" stroke="#AEB8C4" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+
+    <!-- Side Pivot Knobs / Headgear adjustment dials -->
+    <circle cx="-136" cy="10" r="14" fill="#FF8500" stroke="#FFFFFF" stroke-width="2.5" />
+    <circle cx="-136" cy="10" r="6" fill="#071B35" />
+    <circle cx="136" cy="10" r="14" fill="#FF8500" stroke="#FFFFFF" stroke-width="2.5" />
+    <circle cx="136" cy="10" r="6" fill="#071B35" />
+  </g>
+
+  <!-- BRAND NAME "CLOSOLDA" -->
+  <g transform="translate(256, 452)">
+    <!-- CloSolda Text with Industrial Bold Typography -->
+    <text x="0" y="0" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" letter-spacing="4" fill="#FFFFFF">
+      CLO<tspan fill="#FF8500">SOLDA</tspan>
+    </text>
+    <!-- Slogan / Subtitle -->
+    <text x="0" y="24" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="3.5" fill="#AEB8C4">
+      QUALIDADE • SEGURANÇA • COMPROMISSO
+    </text>
+  </g>
+</svg>
