@@ -28,11 +28,11 @@ import {
 // CLIENTS
 // ==========================================
 export const subscribeClients = (
-  userId: string,
+  _userId: string,
   onData: (clients: Client[]) => void
 ) => {
   const colRef = collection(db, 'clients');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -46,7 +46,7 @@ export const subscribeClients = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'clients');
+      handleFirestoreError(error, OperationType.LIST, 'clients');
     }
   );
 };
@@ -87,11 +87,11 @@ export const deleteClient = async (id: string): Promise<void> => {
 // APPOINTMENTS
 // ==========================================
 export const subscribeAppointments = (
-  userId: string,
+  _userId: string,
   onData: (appointments: Appointment[]) => void
 ) => {
   const colRef = collection(db, 'appointments');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -105,7 +105,7 @@ export const subscribeAppointments = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'appointments');
+      handleFirestoreError(error, OperationType.LIST, 'appointments');
     }
   );
 };
@@ -145,11 +145,11 @@ export const deleteAppointment = async (id: string): Promise<void> => {
 // QUOTES (ORÇAMENTOS)
 // ==========================================
 export const subscribeQuotes = (
-  userId: string,
+  _userId: string,
   onData: (quotes: Quote[]) => void
 ) => {
   const colRef = collection(db, 'quotes');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -162,7 +162,7 @@ export const subscribeQuotes = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'quotes');
+      handleFirestoreError(error, OperationType.LIST, 'quotes');
     }
   );
 };
@@ -202,11 +202,11 @@ export const deleteQuote = async (id: string): Promise<void> => {
 // PROJECTS
 // ==========================================
 export const subscribeProjects = (
-  userId: string,
+  _userId: string,
   onData: (projects: Project[]) => void
 ) => {
   const colRef = collection(db, 'projects');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -219,7 +219,7 @@ export const subscribeProjects = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'projects');
+      handleFirestoreError(error, OperationType.LIST, 'projects');
     }
   );
 };
@@ -259,14 +259,14 @@ export const deleteProject = async (id: string): Promise<void> => {
 // PROJECT PHOTOS
 // ==========================================
 export const subscribeProjectPhotos = (
-  userId: string,
+  _userId: string,
   projectId: string | null,
   onData: (photos: ProjectPhoto[]) => void
 ) => {
   const colRef = collection(db, 'project_photos');
   const q = projectId
-    ? query(colRef, where('createdBy', '==', userId), where('projectId', '==', projectId))
-    : query(colRef, where('createdBy', '==', userId));
+    ? query(colRef, where('projectId', '==', projectId))
+    : query(colRef);
 
   return onSnapshot(
     q,
@@ -279,7 +279,7 @@ export const subscribeProjectPhotos = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'project_photos');
+      handleFirestoreError(error, OperationType.LIST, 'project_photos');
     }
   );
 };
@@ -308,11 +308,11 @@ export const deleteProjectPhoto = async (id: string): Promise<void> => {
 // TECHNICAL REPORTS
 // ==========================================
 export const subscribeReports = (
-  userId: string,
+  _userId: string,
   onData: (reports: TechnicalReport[]) => void
 ) => {
   const colRef = collection(db, 'reports');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -325,7 +325,7 @@ export const subscribeReports = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'reports');
+      handleFirestoreError(error, OperationType.LIST, 'reports');
     }
   );
 };
@@ -365,11 +365,11 @@ export const deleteReport = async (id: string): Promise<void> => {
 // DOCUMENTS
 // ==========================================
 export const subscribeDocuments = (
-  userId: string,
+  _userId: string,
   onData: (docs: DocumentRecord[]) => void
 ) => {
   const colRef = collection(db, 'documents');
-  const q = query(colRef, where('createdBy', '==', userId));
+  const q = query(colRef);
 
   return onSnapshot(
     q,
@@ -382,7 +382,7 @@ export const subscribeDocuments = (
       onData(list);
     },
     (error) => {
-      handleFirestoreError(error, OperationType.GET, 'documents');
+      handleFirestoreError(error, OperationType.LIST, 'documents');
     }
   );
 };
@@ -412,9 +412,22 @@ export const deleteDocumentRecord = async (id: string): Promise<void> => {
 // ==========================================
 export const getCompanySettings = async (userId: string): Promise<CompanySettings | null> => {
   try {
-    const docSnap = await getDoc(doc(db, 'settings', userId));
+    // Try global clomec-company first, then fallback to userId or any settings doc
+    let docSnap = await getDoc(doc(db, 'settings', 'clomec-company'));
     if (docSnap.exists()) {
       return { id: docSnap.id, ...(docSnap.data() as Omit<CompanySettings, 'id'>) };
+    }
+    if (userId) {
+      docSnap = await getDoc(doc(db, 'settings', userId));
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...(docSnap.data() as Omit<CompanySettings, 'id'>) };
+      }
+    }
+    // Also try getting the first settings doc in collection
+    const querySnap = await getDocs(collection(db, 'settings'));
+    if (!querySnap.empty) {
+      const first = querySnap.docs[0];
+      return { id: first.id, ...(first.data() as Omit<CompanySettings, 'id'>) };
     }
     return null;
   } catch (error) {
@@ -427,15 +440,14 @@ export const saveCompanySettings = async (
   settings: Partial<CompanySettings>
 ): Promise<void> => {
   try {
-    await setDoc(
-      doc(db, 'settings', userId),
-      {
-        ...settings,
-        createdBy: userId,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+    const payload = {
+      ...settings,
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'settings', 'clomec-company'), payload, { merge: true });
+    if (userId) {
+      await setDoc(doc(db, 'settings', userId), payload, { merge: true });
+    }
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `settings/${userId}`);
   }

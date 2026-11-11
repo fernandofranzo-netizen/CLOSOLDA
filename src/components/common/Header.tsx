@@ -70,13 +70,13 @@ export const Header: React.FC<{ activeTabTitle?: string }> = ({ activeTabTitle }
                 </div>
               )}
 
-              <button
-                onClick={signOutUser}
-                title="Sair do sistema"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+              <div
+                title="Painel Administrativo CloMec - Acesso Direto Ativo"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold"
               >
-                <LogOut className="w-4 h-4" />
-              </button>
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>Acesso Direto</span>
+              </div>
             </div>
           )}
         </div>

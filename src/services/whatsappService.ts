@@ -1,9 +1,11 @@
-import { Client, Quote, TechnicalReport, Appointment } from '../types';
+import { Quote, TechnicalReport, Appointment } from '../types';
 
 export function sanitizePhoneNumber(phone: string): string {
-  // Extract all numbers
-  const digits = phone.replace(/\D/g, '');
-  // Default to Brazil country code +55 if not already prefixed
+  if (!phone) return '';
+  let digits = phone.replace(/\D/g, '');
+  // Remove leading zeros if present
+  digits = digits.replace(/^0+/, '');
+  // Default to Brazil country code +55 if 10 or 11 digits (DDD + phone)
   if (digits.length === 10 || digits.length === 11) {
     return `55${digits}`;
   }
@@ -13,8 +15,25 @@ export function sanitizePhoneNumber(phone: string): string {
 export function openWhatsAppChat(phone: string, message: string) {
   const cleanPhone = sanitizePhoneNumber(phone);
   const encodedText = encodeURIComponent(message.trim());
-  const url = `https://wa.me/${cleanPhone}?text=${encodedText}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
+  const url = cleanPhone
+    ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`
+    : `https://api.whatsapp.com/send?text=${encodedText}`;
+
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+    }, 200);
+  } catch {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 }
 
 export function formatQuoteMessage(client: { nome: string }, quote: Quote, docLink?: string): string {
@@ -118,7 +137,7 @@ export async function shareQuoteWithPdfAttachment(
       if ((error as Error).name === 'AbortError') {
         return { sharedNatively: true, fileName: pdfFile.name };
       }
-      console.warn('Native share failed, falling back to WhatsApp Web URL:', error);
+      console.warn('Native share failed, falling back to direct WhatsApp link:', error);
     }
   }
 
@@ -152,7 +171,7 @@ export async function shareReportWithPdfAttachment(
       if ((error as Error).name === 'AbortError') {
         return { sharedNatively: true, fileName: pdfFile.name };
       }
-      console.warn('Native share failed, falling back to WhatsApp Web URL:', error);
+      console.warn('Native share failed, falling back to direct WhatsApp link:', error);
     }
   }
 
@@ -160,23 +179,4 @@ export async function shareReportWithPdfAttachment(
     openWhatsAppChat(phone, message);
   }
   return { sharedNatively: false, fileName: pdfFile.name };
-}
-
-export async function shareFileNative(file: File, title: string, text: string): Promise<boolean> {
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({
-        files: [file],
-        title,
-        text,
-      });
-      return true;
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Erro ao compartilhar nativamente:', error);
-      }
-      return false;
-    }
-  }
-  return false;
 }

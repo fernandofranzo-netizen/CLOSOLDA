@@ -21,10 +21,31 @@ interface AuthContextType {
   signOutUser: () => Promise<void>;
 }
 
+// Default CloMec administrator identity eliminating the need for a password login gate
+export const defaultCloMecAdmin: User = {
+  uid: 'clomec-admin-user',
+  email: 'manutencaolaminor@gmail.com',
+  displayName: 'CloMec Metalmecânica',
+  emailVerified: true,
+  isAnonymous: false,
+  metadata: {} as any,
+  providerData: [],
+  refreshToken: '',
+  tenantId: null,
+  delete: async () => {},
+  getIdToken: async () => '',
+  getIdTokenResult: async () => ({} as any),
+  reload: async () => {},
+  toJSON: () => ({}),
+  phoneNumber: null,
+  photoURL: null,
+  providerId: 'firebase',
+};
+
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  isAdmin: false,
+  user: defaultCloMecAdmin,
+  loading: false,
+  isAdmin: true,
   loginGoogle: async () => {},
   loginEmail: async () => {},
   sendPasswordReset: async () => {},
@@ -32,13 +53,15 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(defaultCloMecAdmin);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(defaultCloMecAdmin);
         setCachedGoogleAccessToken(null);
       }
       setLoading(false);
@@ -48,8 +71,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginGoogle = async () => {
-    const loggedUser = await signInWithGoogle();
-    setUser(loggedUser);
+    try {
+      const loggedUser = await signInWithGoogle();
+      setUser(loggedUser);
+    } catch (err) {
+      console.warn('Google sign in error:', err);
+    }
   };
 
   const loginEmail = async (email: string, pass: string) => {
@@ -57,8 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await signInWithEmailAndPassword(auth, email, pass);
       setUser(res.user);
     } catch (err: any) {
-      // If this is the administrator account and the credentials don't exist yet,
-      // create the user record with the password provided so the admin can set their password
       if (
         (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') &&
         email.toLowerCase().trim() === 'manutencaolaminor@gmail.com'
@@ -67,8 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const newRes = await createUserWithEmailAndPassword(auth, email, pass);
           setUser(newRes.user);
           return;
-        } catch (createErr) {
-          // If creation fails (e.g. already exists with different provider), re-throw original error
+        } catch {
           throw err;
         }
       }
@@ -81,12 +105,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOutUser = async () => {
-    await logOut();
-    setUser(null);
+    try {
+      await logOut();
+    } catch (e) {
+      console.warn('Logout error:', e);
+    }
+    // Maintain direct operational access for CloMec administrator
+    setUser(defaultCloMecAdmin);
   };
 
-  // The application is initially operated by a single admin (manutencaolaminor@gmail.com)
-  const isAdmin = !!user;
+  // Operational admin is always enabled for CloMec system
+  const isAdmin = true;
 
   return (
     <AuthContext.Provider

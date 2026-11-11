@@ -127,17 +127,6 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
 
   const [formData, setFormData] = useState(initialFormState);
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const [whatsappNotice, setWhatsappNotice] = useState<{
-    clientNome: string;
-    fileName: string;
-  } | null>(null);
-
-  useEffect(() => {
-    if (whatsappNotice) {
-      const timer = setTimeout(() => setWhatsappNotice(null), 7000);
-      return () => clearTimeout(timer);
-    }
-  }, [whatsappNotice]);
 
   // Recalculate totals whenever items or discounts change
   const recalculateTotals = (items: QuoteItem[], desc: number, acre: number) => {
@@ -349,53 +338,40 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
     handleGeneratePDF(quote);
   };
 
-  const handleShareWhatsApp = async (quote: Quote) => {
-    const phone = quote.clientWhatsapp || quote.clientTelefone;
+  const handleShareWhatsApp = (quote: Quote) => {
+    const client = clients.find((c) => c.id === quote.clientId);
+    const phone = quote.clientWhatsapp || quote.clientTelefone || client?.whatsapp || client?.telefone;
     if (!phone) {
       alert('Cliente não possui telefone ou WhatsApp cadastrado.');
       return;
     }
 
     try {
-      // 1. Generate official PDF
+      // 1. Generate and save the official CloMec PDF file directly
       const doc = generateQuotePDF(quote, settings);
-      const pdfBlob = doc.output('blob');
       const fileName = `Orcamento_${quote.numero}_CloMec.pdf`;
-      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      doc.save(fileName);
 
-      // 2. Register document in repository if prop provided
+      // 2. Open WhatsApp immediately with the official proposal message
+      const message = formatQuoteMessage(client || { nome: quote.clientNome }, quote);
+      openWhatsAppChat(phone, message);
+
+      // 3. Register document in repository asynchronously
       if (onRegisterDocument) {
-        await onRegisterDocument({
+        onRegisterDocument({
           clientId: quote.clientId,
           clientNome: quote.clientNome,
           tipo: 'Orçamento',
           titulo: `Orçamento Oficial ${quote.numero}`,
           numeroRef: quote.numero,
           data: quote.dataEmissao,
-          createdBy: '',
+          createdBy: quote.createdBy || '',
           createdAt: new Date().toISOString(),
-        });
-      }
-
-      // 3. Share with PDF as attachment
-      const result = await shareQuoteWithPdfAttachment(
-        { nome: quote.clientNome, whatsapp: quote.clientWhatsapp, telefone: quote.clientTelefone },
-        quote,
-        pdfFile
-      );
-
-      // 4. On desktop / WhatsApp Web (where native file sharing is not supported by the browser sandbox),
-      // we download the PDF automatically and notify the user to attach or drag it into WhatsApp.
-      if (!result.sharedNatively) {
-        doc.save(fileName);
-        setWhatsappNotice({
-          clientNome: quote.clientNome,
-          fileName,
-        });
+        }).catch((err) => console.warn('Document register error:', err));
       }
     } catch (err) {
       console.error('Error sharing quote via WhatsApp with PDF:', err);
-      const message = formatQuoteMessage({ nome: quote.clientNome }, quote);
+      const message = formatQuoteMessage(client || { nome: quote.clientNome }, quote);
       openWhatsAppChat(phone, message);
     }
   };
@@ -1071,31 +1047,6 @@ export const QuotesModule: React.FC<QuotesModuleProps> = ({
       )}
 
       {/* WHATSAPP PDF ATTACHMENT NOTICE TOAST */}
-      {whatsappNotice && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-2xl bg-[#0B213F] border border-[#25D366]/40 shadow-2xl text-slate-100 flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-[#25D366]/20 text-[#25D366] shrink-0 mt-0.5">
-            <WhatsAppIcon variant="official" className="w-5 h-5" />
-          </div>
-          <div className="flex-1 text-xs">
-            <h4 className="font-bold text-white text-sm flex items-center gap-1.5 font-industrial">
-              <span>PDF Oficial Pronto para Envio</span>
-            </h4>
-            <p className="text-slate-300 mt-1 leading-relaxed">
-              O arquivo oficial <span className="font-mono-code font-bold text-[#FF8500]">{whatsappNotice.fileName}</span> foi baixado no seu dispositivo e o WhatsApp aberto para <strong className="text-white">{whatsappNotice.clientNome}</strong>.
-            </p>
-            <p className="text-emerald-400 mt-1.5 font-semibold flex items-center gap-1">
-              <span>📎</span>
-              <span>Basta anexar ou arrastar o PDF para a conversa no WhatsApp!</span>
-            </p>
-          </div>
-          <button
-            onClick={() => setWhatsappNotice(null)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };

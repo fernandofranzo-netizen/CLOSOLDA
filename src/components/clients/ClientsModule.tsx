@@ -332,9 +332,9 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {client.whatsapp && (
+                    {(client.whatsapp || client.telefone) && (
                       <button
-                        onClick={() => openWhatsAppChat(client.whatsapp, `Olá, ${client.nome}! Aqui é da CloMec Serviços Especializados.`)}
+                        onClick={() => openWhatsAppChat(client.whatsapp || client.telefone, `Olá, ${client.nome}! Aqui é da CloMec Serviços Especializados.`)}
                         title="Conversar no WhatsApp"
                         className="p-1.5 rounded-lg bg-[#25D366]/15 hover:bg-[#25D366]/30 border border-[#25D366]/40 transition flex items-center justify-center group shadow-sm"
                       >
@@ -400,9 +400,9 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
             {/* Direct Action Contacts Bar */}
             <div className="bg-[#0B213F] px-5 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                {selectedClient.whatsapp && (
+                {(selectedClient.whatsapp || selectedClient.telefone) && (
                   <button
-                    onClick={() => openWhatsAppChat(selectedClient.whatsapp, `Olá, ${selectedClient.nome}! Entramos em contato da CloMec Serviços Especializados.`)}
+                    onClick={() => openWhatsAppChat(selectedClient.whatsapp || selectedClient.telefone, `Olá, ${selectedClient.nome}! Entramos em contato da CloMec Serviços Especializados.`)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-slate-950 text-xs font-bold transition shadow-sm"
                   >
                     <WhatsAppIcon variant="official" className="w-4 h-4 shrink-0" />

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginView } from './components/auth/LoginView';
 import { Header } from './components/common/Header';
 import {
   DesktopSidebar,
@@ -133,9 +132,7 @@ const MainApp: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <LoginView />;
-  }
+  const activeUserId = user?.uid || 'clomec-admin-user';
 
   // Badges for navigation
   const todayStr = new Date().toISOString().split('T')[0];
@@ -211,7 +208,7 @@ const MainApp: React.FC = () => {
               reports={reports}
               photos={photos}
               onCreateClient={async (c) => {
-                await createClient({ ...c, createdBy: user.uid });
+                await createClient({ ...c, createdBy: activeUserId });
               }}
               onUpdateClient={updateClient}
               onDeleteClient={deleteClient}
@@ -224,7 +221,7 @@ const MainApp: React.FC = () => {
               appointments={appointments}
               clients={clients}
               onCreateAppointment={async (a) => {
-                await createAppointment({ ...a, createdBy: user.uid });
+                await createAppointment({ ...a, createdBy: activeUserId });
               }}
               onUpdateAppointment={updateAppointment}
               onDeleteAppointment={deleteAppointment}
@@ -239,12 +236,12 @@ const MainApp: React.FC = () => {
               initialClientForQuote={initialClientForQuote}
               onClearInitialClient={() => setInitialClientForQuote(null)}
               onCreateQuote={async (q) => {
-                await createQuote({ ...q, createdBy: user.uid });
+                await createQuote({ ...q, createdBy: activeUserId });
               }}
               onUpdateQuote={updateQuote}
               onDeleteQuote={deleteQuote}
               onRegisterDocument={async (d) => {
-                await createDocumentRecord({ ...d, createdBy: user.uid });
+                await createDocumentRecord({ ...d, createdBy: activeUserId });
               }}
             />
           )}
@@ -255,7 +252,7 @@ const MainApp: React.FC = () => {
               clients={clients}
               quotes={quotes}
               onCreateProject={async (p) => {
-                await createProject({ ...p, createdBy: user.uid });
+                await createProject({ ...p, createdBy: activeUserId });
               }}
               onUpdateProject={updateProject}
               onDeleteProject={deleteProject}
@@ -271,7 +268,7 @@ const MainApp: React.FC = () => {
               clients={clients}
               initialProjectId={initialProjectIdForPhoto}
               onCreatePhoto={async (ph) => {
-                await createProjectPhoto({ ...ph, createdBy: user.uid });
+                await createProjectPhoto({ ...ph, createdBy: activeUserId });
               }}
               onDeletePhoto={deleteProjectPhoto}
             />
@@ -286,12 +283,12 @@ const MainApp: React.FC = () => {
               settings={settings || undefined}
               initialProjectIdForReport={initialProjectIdForReport}
               onCreateReport={async (r) => {
-                await createReport({ ...r, createdBy: user.uid });
+                await createReport({ ...r, createdBy: activeUserId });
               }}
               onUpdateReport={updateReport}
               onDeleteReport={deleteReport}
               onRegisterDocument={async (d) => {
-                await createDocumentRecord({ ...d, createdBy: user.uid });
+                await createDocumentRecord({ ...d, createdBy: activeUserId });
               }}
             />
           )}
@@ -309,7 +306,7 @@ const MainApp: React.FC = () => {
             <SettingsModule
               settings={settings}
               onSaveSettings={async (newSettings) => {
-                await saveCompanySettings(user.uid, newSettings);
+                await saveCompanySettings(activeUserId, newSettings);
                 setSettings((prev) => ({ ...(prev || ({} as CompanySettings)), ...newSettings } as CompanySettings));
               }}
             />
